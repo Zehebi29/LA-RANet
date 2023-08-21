@@ -49,10 +49,10 @@ opt = parser.parse_args()
 print(opt)
 
 try:
-    os.makedirs("../new_save/result/train/cropped")
-    os.makedirs("../new_save/result/train/real")
-    os.makedirs("../new_save/result/train/recon")
-    os.makedirs("../new_save/model")
+    os.makedirs("../path/result/train/cropped")
+    os.makedirs("../path/result/train/real")
+    os.makedirs("../path/result/train/recon")
+    os.makedirs("../path/model")
 except OSError:
     pass
 
@@ -153,10 +153,6 @@ fake_label = 0
 bz = int(opt.batchSize)
 sz = int(opt.imageSize / 2)
 
-# customized real_center cize
-
-
-# real_center = torch.FloatTensor(bz, 3, sz, sz)
 
 if opt.cuda:
     netD.cuda()
@@ -206,10 +202,8 @@ for epoch in range(resume_epoch, opt.niter):
         real_cpu, cls_label, _ = data
         input_cpu = input_cpu.cuda()
         input_cpu = Variable(input_cpu)
-        # real_center_cpu = real_cpu[:, :, int(opt.imageSize / 4):int(opt.imageSize / 4) + int(opt.imageSize / 2),
-        #                   int(opt.imageSize / 4):int(opt.imageSize / 4) + int(opt.imageSize / 2)]
+
         for j, _path in enumerate(path):
-            # real_cpu_slice = real_cpu[j, :, :, :].unsqueeze(0)
 
             path_name = _path.split('/')[-1]
             index = file_name_list.index(path_name)
@@ -217,7 +211,7 @@ for epoch in range(resume_epoch, opt.niter):
             center_x = label_line.split(',')[1]
             center_y = label_line.split(',')[2].split('\n')[0]
 
-            real_cpu_slice = cv2.imread(f'../EUS_together/data_full/{path_name}')
+            real_cpu_slice = cv2.imread(f'./path/{path_name}')
             real_cpu_slice = transform_center(real_cpu_slice).unsqueeze(0)
             real_center_cpu_slice = real_cpu_slice[:, :, int(center_x)-56:int(center_x)+56, int(center_y)-56:int(center_y)+56]
 
@@ -232,19 +226,6 @@ for epoch in range(resume_epoch, opt.niter):
         batch_size = input_cpu.size(0)
         input_real.resize_(input_cpu.size()).copy_(input_cpu)
         input_cropped.resize_(input_cpu.size()).copy_(input_cpu)
-        # real_center.resize_(input_cpu.size()).copy_(input_cpu)
-        # input_cropped.data[:, 0,
-        # int(opt.imageSize / 4 + opt.overlapPred):int(opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred),
-        # int(opt.imageSize / 4 + opt.overlapPred):int(
-        #     opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred)] = 2 * 117.0 / 255.0 - 1.0
-        # input_cropped.data[:, 1,
-        # int(opt.imageSize / 4 + opt.overlapPred):int(opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred),
-        # int(opt.imageSize / 4 + opt.overlapPred):int(
-        #     opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred)] = 2 * 104.0 / 255.0 - 1.0
-        # input_cropped.data[:, 2,
-        # int(opt.imageSize / 4 + opt.overlapPred):int(opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred),
-        # int(opt.imageSize / 4 + opt.overlapPred):int(
-        #     opt.imageSize / 4 + opt.imageSize / 2 - opt.overlapPred)] = 2 * 123.0 / 255.0 - 1.0
 
         # train with real
         netD.zero_grad()
@@ -305,14 +286,14 @@ for epoch in range(resume_epoch, opt.niter):
                  errD.item(), errG_D.item(), errG_l2.item(), D_x, D_G_z1,))
         if i % 100 == 0:
             vutils.save_image(real_center_cpu_new,
-                              '../new_save/result/train/real/real_samples_epoch_%03d.png' % (epoch))
+                              '../path/result/train/real/real_samples_epoch_%03d.png' % (epoch))
             vutils.save_image(input_cropped.data,
-                              '../new_save/result/train/cropped/cropped_samples_epoch_%03d.png' % (epoch))
+                              '../path/result/train/cropped/cropped_samples_epoch_%03d.png' % (epoch))
             recon_image = input_cropped.clone()
             recon_image.data[:, :, int(opt.imageSize / 4):int(opt.imageSize / 4 + opt.imageSize / 2),
             int(opt.imageSize / 4):int(opt.imageSize / 4 + opt.imageSize / 2)] = fake.data
             vutils.save_image(recon_image.data,
-                              '../new_save/result/train/recon/recon_center_samples_epoch_%03d.png' % (epoch))
+                              '../path/result/train/recon/recon_center_samples_epoch_%03d.png' % (epoch))
 
     # do checkpointing
     import numpy as np
@@ -325,10 +306,10 @@ for epoch in range(resume_epoch, opt.niter):
         print(f'best error_overall: {error_}')
         torch.save({'epoch': epoch + 1,
                     'state_dict': netD.state_dict()},
-                   f'../new_save/model/overall_error/netlocalD_error.pth')
+                   f'../path/model/overall_error/netlocalD_error.pth')
         torch.save({'epoch': epoch + 1,
                     'state_dict': netG.state_dict()},
-                   f'../new_save/model/overall_error/netG_error.pth')
+                   f'../path/model/overall_error/netG_error.pth')
     else:
         pass
 
@@ -338,10 +319,10 @@ for epoch in range(resume_epoch, opt.niter):
 
         torch.save({'epoch': epoch + 1,
                     'state_dict': netD.state_dict()},
-                   f'../new_save/model/D_error/netlocalD_error.pth')
+                   f'../path/model/D_error/netlocalD_error.pth')
         torch.save({'epoch': epoch + 1,
                     'state_dict': netG.state_dict()},
-                   f'../new_save/model/D_error/netG_error.pth')
+                   f'../path/model/D_error/netG_error.pth')
     else:
         pass
 
@@ -350,9 +331,9 @@ for epoch in range(resume_epoch, opt.niter):
         print(f'best error_G: {errorG_}')
         torch.save({'epoch': epoch + 1,
                     'state_dict': netD.state_dict()},
-                   f'../new_save/model/G_error/netlocalD_error.pth')
+                   f'../path/model/G_error/netlocalD_error.pth')
         torch.save({'epoch': epoch + 1,
                     'state_dict': netG.state_dict()},
-                   f'../new_save/model/G_error/netG_error.pth')
+                   f'../path/model/G_error/netG_error.pth')
     else:
         pass

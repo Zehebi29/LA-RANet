@@ -11,7 +11,6 @@ class ChannelAttentionModule(nn.Module):
     def __init__(self, channel, ratio=2):
         super(ChannelAttentionModule, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        # self.max_pool = nn.AdaptiveMaxPool2d(1)
 
         self.shared_MLP = nn.Sequential(
             nn.Conv2d(channel, channel // ratio, 1, bias=False),
@@ -22,7 +21,6 @@ class ChannelAttentionModule(nn.Module):
 
     def forward(self, x):
         avgout = self.shared_MLP(self.avg_pool(x))
-        # maxout = self.shared_MLP(self.max_pool(x))
         return self.sigmoid(avgout)
 
 
@@ -45,7 +43,6 @@ class RelationalAttention(nn.Module):
 
         self.channel_attention = ChannelAttentionModule(n)
         self.sigmoid = nn.Sigmoid()
-        # self.conv_out = nn.Conv2d(n, planes, kernel_size=1, bias=False)
 
     def forward(self, x):
         avgout = torch.mean(x, dim=1, keepdim=True)
@@ -129,12 +126,3 @@ class RelationNetwork(nn.Module):
         for i, fea in enumerate(featrues):
             out.append(self.att_bulk[i](fea) * fea)
         return out
-
-
-if __name__ == '__main__':
-    net = Net(num_classes=5).cuda(2)
-    print(net)
-    x = torch.ones((32, 3, 224, 224)).cuda(2)
-    c_pred = net(x)
-    print(c_pred)
-

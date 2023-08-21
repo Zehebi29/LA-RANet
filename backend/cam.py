@@ -80,19 +80,6 @@ if __name__ == '__main__':
          "gradcamelementwise": GradCAMElementWise}
 
     model = models.resnet50(pretrained=True)
-
-    # Choose the target layer you want to compute the visualization for.
-    # Usually this will be the last convolutional layer in the model.
-    # Some common choices can be:
-    # Resnet18 and 50: model.layer4
-    # VGG, densenet161: model.features[-1]
-    # mnasnet1_0: model.layers[-1]
-    # You can print the model to help chose the layer
-    # You can pass a list with several target layers,
-    # in that case the CAMs will be computed per layer and then aggregated.
-    # You can also try selecting all layers of a certain type, with e.g:
-    # from pytorch_grad_cam.utils.find_layers import find_layer_types_recursive
-    # find_layer_types_recursive(model, [torch.nn.ReLU])
     target_layers = [model.layer4]
 
     rgb_img = cv2.imread(args.image_path, 1)[:, :, ::-1]
@@ -101,16 +88,8 @@ if __name__ == '__main__':
                                     mean=[0.485, 0.456, 0.406],
                                     std=[0.229, 0.224, 0.225])
 
-    # We have to specify the target we want to generate
-    # the Class Activation Maps for.
-    # If targets is None, the highest scoring category (for every member in the batch) will be used.
-    # You can target specific categories by
-    # targets = [e.g ClassifierOutputTarget(281)]
     targets = None
 
-    # Using the with statement ensures the context is freed, and you can
-    # recreate different CAM objects in a loop.
-    cam_algorithm = methods[args.method]
     with cam_algorithm(model=model,
                        target_layers=target_layers,
                        use_cuda=args.use_cuda) as cam:

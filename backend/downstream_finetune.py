@@ -219,13 +219,13 @@ def cfg_log(log_path):
 if __name__ == '__main__':
     args = get_args()
     args.py_name = 'downstream_finetune.py'
-    args.log_path = './logs/super_LA_RANet'
-    args.pth_path = './runs/super_LA_RANet'
-    args.model_structure = 'super_LA_RANet'
+    args.log_path = './logs/LA_RANet'
+    args.pth_path = './runs/LA_RANet'
+    args.model_structure = 'LA_RANet'
     args.resume_option = False
-    args.resume_pth = './runs/SSL_relationNet_multihead_18/best_acc_49.pth'
+    args.resume_pth = './runs/resume.pth'
 
-    args.ssl_pth = '/home/zhb/Desktop/experiment/new_save/model_5/overall_error/netG.pth'
+    args.ssl_pth = '/path/netG.pth'
 
     device = torch.device("cuda:4" if torch.cuda.is_available() else "cpu")
     cfg_log('trainning-cfg-log.txt')
